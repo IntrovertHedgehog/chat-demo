@@ -1,6 +1,6 @@
 import Icon from 'react-native-vector-icons/FontAwesome';
 import IconAnt from 'react-native-vector-icons/AntDesign';
-import React from 'react';
+import React, {Ref, useImperativeHandle, useState} from 'react';
 import {
   Modal,
   Text,
@@ -8,6 +8,7 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
+  TouchableNativeFeedback,
 } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -35,6 +36,7 @@ const styles = StyleSheet.create({
   },
   button: {
     borderRadius: 20,
+    marginTop: 15,
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 20,
@@ -57,7 +59,7 @@ const styles = StyleSheet.create({
   },
   reactionBox: {
     marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 15,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
@@ -67,6 +69,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    width: 80,
   },
   input: {
     height: 60,
@@ -80,32 +83,92 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   closeButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
     right: 10,
-  }
+  },
 });
 
-function Feedback({showFeedback, close}: {showFeedback: boolean, close: () => void}): JSX.Element {
+export interface FeedbackRef {
+  openModal: () => void;
+  closeModal: () => void;
+  setMessageId: (arg0: number) => void;
+}
+
+export interface MessageFeedback {
+  messageId: number;
+  vote: -1 | 0 | 1;
+  details?: string;
+}
+
+function Feedback(_: any, ref: Ref<FeedbackRef>): JSX.Element {
+  const [visible, setVisible] = useState<boolean>(false);
+  const [messageFeedback, setMessageFeedback] = useState<MessageFeedback>({
+    messageId: -1,
+    vote: 0,
+  });
+
+  const openModal = () => {
+    setVisible(true);
+  };
+
+  const closeModal = () => {
+    setVisible(false);
+    setMessageFeedback({...messageFeedback, vote: 0});
+  };
+
+  const setMessageId = (arg0: number) => {
+    setMessageFeedback({
+      messageId: arg0,
+      vote: 0,
+    });
+  };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      openModal: openModal,
+      closeModal: closeModal,
+      setMessageId: setMessageId,
+    }),
+    [openModal, closeModal, setMessageId],
+  );
+
+  const voteUp = () => {
+    setMessageFeedback({...messageFeedback, vote: 1});
+  };
+
+  const voteDown = () => {
+    setMessageFeedback({...messageFeedback, vote: -1});
+  };
+
   return (
-    <Modal transparent={true} visible={showFeedback}>
+    <Modal
+      transparent={true}
+      visible={visible}
+      onRequestClose={closeModal}
+      animationType="fade">
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Pressable style={styles.closeButton} onPress={close}>
+          <Pressable style={styles.closeButton} onPress={closeModal}>
             <IconAnt name="close" size={30} />
           </Pressable>
           <Text style={styles.modalHeading}>Is this answer sufficient?</Text>
           <View style={styles.reactionBox}>
-            <Pressable
-              style={styles.voteButton}
-              onPress={() => console.log(12)}>
-              <Icon name="thumbs-up" size={45} />
+            <Pressable style={styles.voteButton} onPress={voteUp}>
+              <Icon
+                name="thumbs-up"
+                size={45}
+                color={messageFeedback.vote == 1 ? '#E13700' : '#6d6e70'}
+              />
               <Text style={{fontSize: 15}}>Yes </Text>
             </Pressable>
-            <Pressable
-              style={styles.voteButton}
-              onPress={() => console.log(13)}>
-              <Icon name="thumbs-down" size={45} />
+            <Pressable style={styles.voteButton} onPress={voteDown}>
+              <Icon
+                name="thumbs-down"
+                size={45}
+                color={messageFeedback.vote == -1 ? '#337CA0' : '#6d6e70'}
+              />
               <Text style={{fontSize: 15}}>No </Text>
             </Pressable>
           </View>
@@ -116,7 +179,7 @@ function Feedback({showFeedback, close}: {showFeedback: boolean, close: () => vo
               multiline
             />
           </View>
-          <Pressable style={styles.button} onPress={close}>
+          <Pressable style={styles.button} onPress={closeModal}>
             <Text style={styles.textStyle}>Submit</Text>
           </Pressable>
         </View>

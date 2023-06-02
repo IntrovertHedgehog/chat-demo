@@ -1,15 +1,22 @@
 import * as TalkRn from '@talkjs/react-native';
-import {useEffect, useRef, useState} from 'react';
-import Feedback from '../components/Feedback';
+import {forwardRef, useEffect, useRef, useState} from 'react';
+import _Feedback, {FeedbackRef} from '../components/Feedback';
+
+const Feedback = forwardRef(_Feedback);
 
 function ChatHuman(): JSX.Element {
-  const [showFeedback, setShowFeedback] = useState(false);
   const chatBoxRef = useRef<TalkRn.ChatboxRef>(null);
+  const feedbackRef = useRef<FeedbackRef>(null);
   useEffect(() => {
     chatBoxRef!.current!.onCustomMessageAction('feedback', event => {
-      setShowFeedback(true);
+      openModal();
     });
   });
+
+  const openModal = () => {
+    feedbackRef!.current!.openModal();
+  };
+
   const me = {
     id: '123456789',
     name: 'Alice',
@@ -46,10 +53,7 @@ function ChatHuman(): JSX.Element {
 
   return (
     <TalkRn.Session appId="tE8jvP6M" me={me}>
-      <Feedback
-        showFeedback={showFeedback}
-        close={() => setShowFeedback(false)}
-      />
+      <Feedback ref={feedbackRef} />
       <TalkRn.Chatbox
         theme="empower"
         conversationBuilder={converationBuilder}
