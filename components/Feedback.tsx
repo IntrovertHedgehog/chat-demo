@@ -1,30 +1,28 @@
-import Icon from 'react-native-vector-icons/FontAwesome';
 import IconAnt from 'react-native-vector-icons/AntDesign';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import React, {Ref, useImperativeHandle, useState} from 'react';
-import {
-  Modal,
-  Text,
-  View,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  TouchableNativeFeedback,
-} from 'react-native';
+import {Modal, Text, View, Pressable, StyleSheet} from 'react-native';
 
+const colors = {
+  grey: '#E5E5EA',
+  green: '#38C172',
+  lightgrey: "#21293A1A"
+};
 const styles = StyleSheet.create({
-  centeredView: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
+    flexDirection: 'column-reverse',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    backgroundColor: '#0008',
   },
   modalView: {
-    margin: 20,
     backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    paddingTop: 15,
-    alignItems: 'center',
+    borderRadius: 15,
+    padding: 25,
+    paddingTop: 20,
+    paddingBottom: 80,
+    alignItems: 'stretch',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -34,27 +32,26 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  modalHeading: {
+    fontSize: 26,
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+    color: '#111',
+  },
   button: {
-    borderRadius: 20,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 60,
+    height: 60,
     marginTop: 15,
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 20,
-    paddingRight: 20,
     elevation: 2,
     backgroundColor: '#38c172',
   },
-  modalHeading: {
-    fontSize: 24,
-    color: '#111',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
-  },
   textStyle: {
     color: 'white',
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
   },
   reactionBox: {
@@ -63,29 +60,24 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 50,
+    gap: 10,
   },
   voteButton: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: 80,
-  },
-  input: {
-    height: 60,
-    flex: 1,
-    width: '100%',
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    borderColor: 'gray',
-    borderRadius: 12,
-    fontSize: 17,
+    justifyContent: 'space-between',
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderWidth: 1.5,
+    borderRadius: 10,
+    height: 120,
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 20,
+    right: 20,
   },
 });
 
@@ -98,7 +90,6 @@ export interface FeedbackRef {
 export interface MessageFeedback {
   messageId: number;
   vote: -1 | 0 | 1;
-  details?: string;
 }
 
 function Feedback(_: any, ref: Ref<FeedbackRef>): JSX.Element {
@@ -142,42 +133,34 @@ function Feedback(_: any, ref: Ref<FeedbackRef>): JSX.Element {
     setMessageFeedback({...messageFeedback, vote: -1});
   };
 
+  const likeColor = messageFeedback.vote == 1 ? colors.green : colors.grey;
+  const dislikeColor = messageFeedback.vote == -1 ? colors.green : colors.grey;
+
   return (
     <Modal
       transparent={true}
       visible={visible}
       onRequestClose={closeModal}
       animationType="fade">
-      <View style={styles.centeredView}>
+      <View style={styles.container}>
         <View style={styles.modalView}>
           <Pressable style={styles.closeButton} onPress={closeModal}>
-            <IconAnt name="close" size={30} />
+            <IconAnt name="closecircle" size={30} color={colors.lightgrey} />
           </Pressable>
-          <Text style={styles.modalHeading}>Is this answer sufficient?</Text>
+          <Text style={styles.modalHeading}>Rate Response</Text>
           <View style={styles.reactionBox}>
-            <Pressable style={styles.voteButton} onPress={voteUp}>
-              <Icon
-                name="thumbs-up"
-                size={45}
-                color={messageFeedback.vote == 1 ? '#E13700' : '#6d6e70'}
-              />
-              <Text style={{fontSize: 15}}>Yes </Text>
+            <Pressable
+              style={{...styles.voteButton, borderColor: likeColor}}
+              onPress={voteUp}>
+              <SimpleLineIcons name="like" size={45} color={likeColor} style={{fontWeight: '100'}}/>
+              <Text style={{fontSize: 15, color: likeColor}}>Like</Text>
             </Pressable>
-            <Pressable style={styles.voteButton} onPress={voteDown}>
-              <Icon
-                name="thumbs-down"
-                size={45}
-                color={messageFeedback.vote == -1 ? '#337CA0' : '#6d6e70'}
-              />
-              <Text style={{fontSize: 15}}>No </Text>
+            <Pressable
+              style={{...styles.voteButton, borderColor: dislikeColor}}
+              onPress={voteDown}>
+              <SimpleLineIcons name="dislike" size={45} color={dislikeColor} />
+              <Text style={{fontSize: 15, color: dislikeColor}}>Dislike</Text>
             </Pressable>
-          </View>
-          <View style={{display: 'flex', flexDirection: 'row'}}>
-            <TextInput
-              style={styles.input}
-              placeholder="Details..."
-              multiline
-            />
           </View>
           <Pressable style={styles.button} onPress={closeModal}>
             <Text style={styles.textStyle}>Submit</Text>
